@@ -1,7 +1,11 @@
 # Movies
 
 ### Description:
-    ...
+   Сервис оценки фильмов.
+   Автор: Сагалов Леонид
+   
+### Start application
+    make up
     
 ### Create venv:
     make venv
