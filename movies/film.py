@@ -2,13 +2,13 @@ from typing import List
 
 
 class Film:
-    def __init__(self, name: str, year: int, list_marks: List[input],
-                 list_reviews: List[str], average_mark: float = 0,):
+    def __init__(self, name: str, year: int, list_marks: List[int] = [],
+                 list_reviews: List[str] = [], average_mark: float = 0,):
         self.name = name
         self.year = year
         self.marks = list_marks
-        self.average = average_mark
         self.reviews = list_reviews
+        self.average = average_mark
 
     def create_dict(self):
         return {
@@ -16,7 +16,7 @@ class Film:
             'year': self.year,
             'reviews': self.reviews,
             'marks': self.marks,
-            'average_mark': self.get_average_mark()
+            'average_mark': self.average
         }
 
     def add_comment(self, text: str):
