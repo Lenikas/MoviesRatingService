@@ -1,41 +1,33 @@
-from typing import List
+from typing import Any, List, Union
 
 
 class Film:
-    def __init__(self, name: str, year: int, list_marks: List[int] = [],
-                 list_reviews: List[str] = [], average_mark: float = 0,):
+    def __init__(
+        self, name: str, year: int, list_marks: List[int], list_reviews: List[str]
+    ):
         self.name = name
         self.year = year
         self.marks = list_marks
         self.reviews = list_reviews
-        self.average = average_mark
 
-    def create_dict(self):
+    def create_dict(self) -> Any:
         return {
             'name': self.name,
             'year': self.year,
             'reviews': self.reviews,
             'marks': self.marks,
-            'average_mark': self.average
         }
 
-    def add_comment(self, text: str):
-        self.reviews.append(text)
-
-    def add_rating(self, mark: int):
-        self.marks.append(mark)
-
-    def add_year(self, year: int):
-        self.year = year
-
-    def get_average_mark(self):
+    def get_average_mark(self) -> Union[int, float]:
         if len(self.marks) == 0:
-            self.average = 0
-        else:
-            sum_marks: int = 0
-            for mark in self.marks:
-                sum_marks += mark
-            self.average = sum_marks / len(self.marks)
+            return 0
+        sum_marks: int = 0
+        for mark in self.marks:
+            sum_marks += mark
+        return sum_marks / len(self.marks)
 
+    def get_count_reviews(self) -> int:
+        return len(self.reviews)
 
-
+    def get_count_marks(self) -> int:
+        return len(self.marks)

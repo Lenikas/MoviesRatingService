@@ -144,6 +144,17 @@ dotenv = ["python-dotenv"]
 
 [[package]]
 category = "main"
+description = "Basic and Digest HTTP authentication for Flask routes"
+name = "flask-httpauth"
+optional = false
+python-versions = "*"
+version = "3.3.0"
+
+[package.dependencies]
+Flask = "*"
+
+[[package]]
+category = "main"
 description = "A Python utility / library to sort Python imports."
 name = "isort"
 optional = false
@@ -436,7 +447,7 @@ python-versions = "*"
 version = "1.11.2"
 
 [metadata]
-content-hash = "a48e7e0beb99b453341a9735624467b2f76dadf941645be006e4753d3a020f2f"
+content-hash = "b6cf73c5ca17bae7ad6dce33ae193bf07c08f6c05a40c6a0551f7a815a02eea6"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -515,6 +526,10 @@ flake8 = [
 flask = [
     {file = "Flask-1.1.1-py2.py3-none-any.whl", hash = "sha256:45eb5a6fd193d6cf7e0cf5d8a5b31f83d5faae0293695626f539a823e93b13f6"},
     {file = "Flask-1.1.1.tar.gz", hash = "sha256:13f9f196f330c7c2c5d7a5cf91af894110ca0215ac051b5844701f2bfd934d52"},
+]
+flask-httpauth = [
+    {file = "Flask-HTTPAuth-3.3.0.tar.gz", hash = "sha256:6ef8b761332e780f9ff74d5f9056c2616f52babc1998b01d9f361a1e439e61b9"},
+    {file = "Flask_HTTPAuth-3.3.0-py2.py3-none-any.whl", hash = "sha256:0149953720489407e51ec24bc2f86273597b7973d71cd51f9443bd0e2a89bd72"},
 ]
 isort = [
     {file = "isort-4.3.21-py2.py3-none-any.whl", hash = "sha256:6e811fcb295968434526407adb8796944f1988c5b65e8139058f2014cbe100fd"},
