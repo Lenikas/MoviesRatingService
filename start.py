@@ -31,7 +31,7 @@ def add_user() -> Any:
 
     name_user = request.json.get("username")
     try:
-        find_user(name_user)
+        find_user(name_user, USER_STORAGE)
         return jsonify({"ERROR": "User with the same name already exist, please choose another name"}), 400
     except ValueError:
         pass
@@ -41,9 +41,9 @@ def add_user() -> Any:
     return jsonify({"ACTION": {"username": name_user}})
 
 
-def find_user(username: str) -> User:
+def find_user(username: str, user_storage: List[User]) -> User:
     """Смотрим наличие пользователя в хранилище"""
-    for user in USER_STORAGE:
+    for user in user_storage:
         if user.name == username:
             return user
     raise ValueError
@@ -57,7 +57,7 @@ def create_film(username: str) -> Any:
         return jsonify({"ERROR": "Invalid data, please give name and year of film"}), 400
 
     try:
-        user = find_user(username)
+        user = find_user(username, USER_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "User does not exist"})
 
@@ -91,7 +91,7 @@ def add_review(username: str) -> Any:
         return jsonify({"ERROR": "Invalid data, please give name and year of film and your review"}), 400
 
     try:
-        user = find_user(username)
+        user = find_user(username, USER_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "User does not exist"}), 404
 
@@ -115,7 +115,7 @@ def add_mark(username: str) -> Any:
         return jsonify({"ERROR": "Invalid data, please give name and year of film and your mark"}), 400
 
     try:
-        user = find_user(username)
+        user = find_user(username, USER_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "User does not exist"}), 404
 
@@ -130,9 +130,9 @@ def add_mark(username: str) -> Any:
     return jsonify({"ADD_MARK": {"name": name_film, "mark": mark_film}})
 
 
-def find_film(name: str, year: str) -> Film:
+def find_film(name: str, year: str, film_storage: List[Film]) -> Film:
     """Ищем фильм в хранилище по параметрам: название и год"""
-    for film in FILM_STORAGE:
+    for film in film_storage:
         if film.name == name and int(year) == film.year:
             return film
     raise ValueError
@@ -143,7 +143,7 @@ def find_film(name: str, year: str) -> Film:
 def get_average(name: str, year: str) -> Any:
     """Получаем среднюю оценку фильма по его названию и году или узнаем,что фильма нет в хранилище"""
     try:
-        film: Film = find_film(name, year)
+        film: Film = find_film(name, year, FILM_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "This film not exist"}), 404
     return jsonify({"AVERAGE": film.get_average_mark()})
@@ -154,7 +154,7 @@ def get_average(name: str, year: str) -> Any:
 def get_count_reviews(name: str, year: str) -> Any:
     """Получаем количество отзывов фильма по его названию и году или узнаем,что фильма нет в хранилище"""
     try:
-        film: Film = find_film(name, year)
+        film: Film = find_film(name, year, FILM_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "This film not exist"}), 404
     return jsonify({"COUNT_REVIEWS": film.get_count_reviews()})
@@ -165,7 +165,7 @@ def get_count_reviews(name: str, year: str) -> Any:
 def get_count_marks(name: str, year: str) -> Any:
     """Получаем количество оценок фильма по его названию и году или узнаем,что фильма нет в хранилище"""
     try:
-        film: Film = find_film(name, year)
+        film: Film = find_film(name, year, FILM_STORAGE)
     except ValueError:
         return jsonify({"ERROR": "This film not exist"}), 404
     return jsonify({"COUNT_MARKS": film.get_count_marks()})
