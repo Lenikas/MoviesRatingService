@@ -4,21 +4,21 @@ from movies.film import Film
 
 @pytest.fixture()
 def film():
-    return Film("film", 2010, [], [])
+    return Film('film', 2010, [], [])
 
 
 @pytest.fixture()
 def film_with_data():
-    return Film("film", 2010, [5, 4], ["review1", "review2"])
+    return Film('film', 2010, [5, 4], ['review1', 'review2'])
 
 
 def test_init_film(film):
-    assert film.name == "film"
+    assert film.name == 'film'
     assert film.year == 2010
 
 
 def test_init_film_with_data(film_with_data):
-    assert film_with_data.name == "film"
+    assert film_with_data.name == 'film'
     assert len(film_with_data.marks) == 2
     assert len(film_with_data.reviews) == 2
 
@@ -26,8 +26,8 @@ def test_init_film_with_data(film_with_data):
 def test_create_dict(film):
     actual = film.create_dict()
     assert isinstance(actual, dict) is True
-    assert actual["name"] == "film"
-    assert actual["year"] == 2010
+    assert actual['name'] == 'film'
+    assert actual['year'] == 2010
 
 
 def test_get_average(film, film_with_data):
