@@ -29,4 +29,4 @@ format:
 ci:	lint test
 
 up : 
-	export FLASK_APP=app.py; flask run
+	export FLASK_APP=start.py; flask run
