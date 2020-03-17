@@ -29,7 +29,7 @@ class User:
                     return None
                 needed_film.marks.append(data)
 
-            self.reviews[film.name] = data
+            self.reviews[film.name + str(film.year)] = data
             return needed_film
         return None
 

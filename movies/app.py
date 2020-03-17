@@ -1,5 +1,6 @@
 from typing import Any, List, Union
 
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, jsonify, make_response, request
 from flask_httpauth import HTTPBasicAuth
 from movies.film import Film
@@ -12,12 +13,12 @@ FILM_STORAGE: List[Film] = []
 USER_STORAGE: List[User] = []
 
 
-@auth.get_password
-def get_password(username: str) -> Union[str, None]:
+@auth.verify_password
+def get_password(username: str, password: Any) -> Union[str, bool]:
     for user in USER_STORAGE:
         if user.name == username:
-            return str(user.password)
-    return None
+            return check_password_hash(user.password, password)
+    return False
 
 
 @auth.error_handler
@@ -51,8 +52,8 @@ def add_user() -> Any:
     except ValueError:
         pass
     password = str(request.json.get('password'))
-    #   с хэшами пока не получилось сделать
-    USER_STORAGE.append(User(name_user, password, {}))
+    hsh = generate_password_hash(password)
+    USER_STORAGE.append(User(name_user, hsh, {}))
     return jsonify({'ACTION': {'username': name_user}})
 
 
@@ -65,7 +66,7 @@ def find_user(username: str, user_storage: List[User]) -> User:
 
 
 @server.route('/movies/api/v1.0/<username>/add', methods=['POST'])
-#   @auth.login_required
+@auth.login_required
 def create_film(username: str) -> Any:
     """Создаем фильм,если такой уже есть, получаем соответсвующее информирование"""
     if not request.json or 'name' not in request.json or 'year' not in request.json:
@@ -90,19 +91,17 @@ def create_film(username: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/films', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_list_films() -> Any:
     """Получаем все имеющиеся фильмы"""
     result = {}
-    i = 0
-    for film in FILM_STORAGE:
-        result['FILM{}'.format(i)] = film.create_dict()
-        i += 1
+    for number, film in enumerate(FILM_STORAGE):
+        result['FILM{}'.format(number)] = film.create_dict()
     return jsonify({'LIST OF FILMS': result})
 
 
 @server.route('/movies/api/v1.0/<username>/add_review', methods=['POST'])
-#   @auth.login_required
+@auth.login_required
 def add_review(username: str) -> Any:
     """Добавляем ревью к фильму или получаем информацию, что такого фильма еще нет"""
     if (
@@ -126,7 +125,10 @@ def add_review(username: str) -> Any:
         return jsonify({'ERROR': 'User does not exist'}), 404
 
     name_film: str = request.json.get('name')
-    year_film: int = int(request.json.get('year'))
+    try:
+        year_film: int = int(request.json.get('year'))
+    except ValueError:
+        return jsonify({'ERROR': 'Year of film must be a number, check it'}), 404
     review_film: str = request.json.get('review')
     film = user.add_review_or_mark(
         Film(name_film, year_film, [], []), FILM_STORAGE, review_film
@@ -139,7 +141,7 @@ def add_review(username: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/<username>/add_mark', methods=['POST'])
-#   @auth.login_required
+@auth.login_required
 def add_mark(username: str) -> Any:
     """Добавляем оценку к фильму или получаем информацию, что такого фильма еще нет"""
     if (
@@ -190,7 +192,7 @@ def find_film(name: str, year: str, film_storage: List[Film]) -> Film:
 
 
 @server.route('/movies/api/v1.0/get_average/<name>/<year>', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_average(name: str, year: str) -> Any:
     """Получаем среднюю оценку фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
@@ -202,7 +204,7 @@ def get_average(name: str, year: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/get_count_reviews/<name>/<year>', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_count_reviews(name: str, year: str) -> Any:
     """Получаем количество отзывов фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
@@ -214,7 +216,7 @@ def get_count_reviews(name: str, year: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/get_count_marks/<name>/<year>', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_count_marks(name: str, year: str) -> Any:
     """Получаем количество оценок фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
@@ -226,7 +228,7 @@ def get_count_marks(name: str, year: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/get_films/substring/<substring>', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_films_substring(substring: str) -> Any:
     """Получаем список фильмов найденных по подстроке в названии"""
     result: List[str] = []
@@ -237,7 +239,7 @@ def get_films_substring(substring: str) -> Any:
 
 
 @server.route('/movies/api/v1.0/get_films/average/<average>', methods=['GET'])
-#   @auth.login_required
+@auth.login_required
 def get_films_average(average: str) -> Any:
     """Получаем список фильмов, у которых средняя оценка совпадает с запросом"""
     result: List[str] = []

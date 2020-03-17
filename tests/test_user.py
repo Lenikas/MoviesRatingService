@@ -44,10 +44,10 @@ def test_add_mark_or_review(storage, user, data):
     assert actual.year == 2010
     if data == 5:
         assert actual.marks == [5]
-        assert user.reviews['film'] == 5
+        assert user.reviews['film' + "2010"] == 5
     else:
         assert actual.reviews == ['review']
-        assert user.reviews['film'] == 'review'
+        assert user.reviews['film' + "2010"] == 'review'
 
 
 @pytest.mark.parametrize('data', [-1, 11])
