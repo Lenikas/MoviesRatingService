@@ -5,6 +5,7 @@ from flask import Flask, jsonify, make_response, request
 from flask_httpauth import HTTPBasicAuth
 from movies.film import Film
 from movies.user import User
+from movies.exception import UserNotFound
 
 server = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -49,7 +50,7 @@ def add_user() -> Any:
             ),
             400,
         )
-    except ValueError:
+    except UserNotFound:
         pass
     password = str(request.json.get('password'))
     hsh = generate_password_hash(password)
@@ -62,7 +63,7 @@ def find_user(username: str, user_storage: List[User]) -> User:
     for user in user_storage:
         if user.name == username:
             return user
-    raise ValueError
+    raise UserNotFound("This user does not exist")
 
 
 @server.route('/movies/api/v1.0/<username>/add', methods=['POST'])
@@ -77,7 +78,7 @@ def create_film(username: str) -> Any:
 
     try:
         user = find_user(username, USER_STORAGE)
-    except ValueError:
+    except UserNotFound:
         return jsonify({'ERROR': 'User does not exist'}), 400
 
     name_film = request.json.get('name')
@@ -121,7 +122,7 @@ def add_review(username: str) -> Any:
 
     try:
         user = find_user(username, USER_STORAGE)
-    except ValueError:
+    except UserNotFound:
         return jsonify({'ERROR': 'User does not exist'}), 404
 
     name_film: str = request.json.get('name')
@@ -161,7 +162,7 @@ def add_mark(username: str) -> Any:
 
     try:
         user = find_user(username, USER_STORAGE)
-    except ValueError:
+    except UserNotFound:
         return jsonify({'ERROR': 'User does not exist'}), 404
 
     name_film: str = request.json.get('name')

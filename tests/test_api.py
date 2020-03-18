@@ -2,10 +2,11 @@ from base64 import b64encode
 
 import pytest
 from flask import json
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 from movies.app import FILM_STORAGE, USER_STORAGE, find_film, find_user, server
 from movies.film import Film
 from movies.user import User
+from movies.exception import UserNotFound
 
 
 @pytest.fixture()
@@ -77,7 +78,7 @@ def film_storage(film_exist):
 
 
 def test_find_not_exist_user(user_not_exist, user_storage):
-    with pytest.raises(ValueError):
+    with pytest.raises(UserNotFound):
         find_user(user_not_exist.name, user_storage)
 
 
