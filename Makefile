@@ -27,3 +27,6 @@ format:
 	$(VENV)/bin/unify --in-place --recursive $(ALL)
 
 ci:	lint test
+
+up : 
+	export FLASK_APP=start.py; flask run
