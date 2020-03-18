@@ -1,11 +1,11 @@
 from typing import Any, List, Union
 
-from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, jsonify, make_response, request
 from flask_httpauth import HTTPBasicAuth
+from movies.exception import FilmNotFound, UserNotFound
 from movies.film import Film
 from movies.user import User
-from movies.exception import UserNotFound
+from werkzeug.security import check_password_hash, generate_password_hash
 
 server = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -25,6 +25,16 @@ def get_password(username: str, password: Any) -> Union[str, bool]:
 @auth.error_handler
 def unauthorized() -> Any:
     return make_response(jsonify({'ERROR': 'Unauthorized access'}), 401)
+
+
+@server.errorhandler(UserNotFound)
+def handle_not_found_user(error: Any) -> Any:
+    return jsonify({'ERROR': '{0}'.format(error)}), 404
+
+
+@server.errorhandler(FilmNotFound)
+def handle_not_found_film(error: Any) -> Any:
+    return jsonify({'ERROR': '{0}'.format(error)}), 404
 
 
 @server.route('/movies/api/v1.0/create_account', methods=['POST'])
@@ -63,7 +73,7 @@ def find_user(username: str, user_storage: List[User]) -> User:
     for user in user_storage:
         if user.name == username:
             return user
-    raise UserNotFound("This user does not exist")
+    raise UserNotFound('Unregistered user')
 
 
 @server.route('/movies/api/v1.0/<username>/add', methods=['POST'])
@@ -75,11 +85,7 @@ def create_film(username: str) -> Any:
             jsonify({'ERROR': 'Invalid data, please give name and year of film'}),
             400,
         )
-
-    try:
-        user = find_user(username, USER_STORAGE)
-    except UserNotFound:
-        return jsonify({'ERROR': 'User does not exist'}), 400
+    user = find_user(username, USER_STORAGE)
 
     name_film = request.json.get('name')
     year_film = request.json.get('year')
@@ -119,12 +125,7 @@ def add_review(username: str) -> Any:
             ),
             400,
         )
-
-    try:
-        user = find_user(username, USER_STORAGE)
-    except UserNotFound:
-        return jsonify({'ERROR': 'User does not exist'}), 404
-
+    user = find_user(username, USER_STORAGE)
     name_film: str = request.json.get('name')
     try:
         year_film: int = int(request.json.get('year'))
@@ -159,12 +160,7 @@ def add_mark(username: str) -> Any:
             ),
             400,
         )
-
-    try:
-        user = find_user(username, USER_STORAGE)
-    except UserNotFound:
-        return jsonify({'ERROR': 'User does not exist'}), 404
-
+    user = find_user(username, USER_STORAGE)
     name_film: str = request.json.get('name')
     year_film: int = int(request.json.get('year'))
     mark_film: int = int(request.json.get('mark'))
@@ -189,7 +185,7 @@ def find_film(name: str, year: str, film_storage: List[Film]) -> Film:
     for film in film_storage:
         if film.name == name and int(year) == film.year:
             return film
-    raise ValueError
+    raise FilmNotFound('Film does not exist')
 
 
 @server.route('/movies/api/v1.0/get_average/<name>/<year>', methods=['GET'])
@@ -197,10 +193,7 @@ def find_film(name: str, year: str, film_storage: List[Film]) -> Film:
 def get_average(name: str, year: str) -> Any:
     """Получаем среднюю оценку фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
-    try:
-        film: Film = find_film(name, year, FILM_STORAGE)
-    except ValueError:
-        return jsonify({'ERROR': 'This film not exist'}), 404
+    film: Film = find_film(name, year, FILM_STORAGE)
     return jsonify({'AVERAGE': film.get_average_mark()})
 
 
@@ -209,10 +202,7 @@ def get_average(name: str, year: str) -> Any:
 def get_count_reviews(name: str, year: str) -> Any:
     """Получаем количество отзывов фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
-    try:
-        film: Film = find_film(name, year, FILM_STORAGE)
-    except ValueError:
-        return jsonify({'ERROR': 'This film not exist'}), 404
+    film: Film = find_film(name, year, FILM_STORAGE)
     return jsonify({'COUNT_REVIEWS': film.get_count_reviews()})
 
 
@@ -221,10 +211,7 @@ def get_count_reviews(name: str, year: str) -> Any:
 def get_count_marks(name: str, year: str) -> Any:
     """Получаем количество оценок фильма по его названию и году
     или узнаем,что фильма нет в хранилище"""
-    try:
-        film: Film = find_film(name, year, FILM_STORAGE)
-    except ValueError:
-        return jsonify({'ERROR': 'This film not exist'}), 404
+    film: Film = find_film(name, year, FILM_STORAGE)
     return jsonify({'COUNT_MARKS': film.get_count_marks()})
 
 

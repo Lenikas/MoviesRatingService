@@ -2,11 +2,11 @@ from base64 import b64encode
 
 import pytest
 from flask import json
-from werkzeug.security import generate_password_hash
 from movies.app import FILM_STORAGE, USER_STORAGE, find_film, find_user, server
+from movies.exception import FilmNotFound, UserNotFound
 from movies.film import Film
 from movies.user import User
-from movies.exception import UserNotFound
+from werkzeug.security import generate_password_hash
 
 
 @pytest.fixture()
@@ -88,7 +88,7 @@ def test_find_user(user_exist, user_storage):
 
 
 def test_find_exist_film(film_not_exist, film_storage):
-    with pytest.raises(ValueError):
+    with pytest.raises(FilmNotFound):
         find_film(film_not_exist.name, film_not_exist.year, film_storage)
 
 
@@ -139,8 +139,8 @@ def test_create_film_data(client, header):
         content_type='application/json',
     )
     data = json.loads(response.get_data())
-    assert response.status_code == 400
-    assert data['ERROR'] == 'User does not exist'
+    assert response.status_code == 404
+    assert data['ERROR'] == 'Unregistered user'
 
 
 def test_create_film(client, header):
@@ -194,7 +194,7 @@ def test_add_review_not_exist_user(client, header):
     )
     data = json.loads(response.get_data())
     assert response.status_code == 404
-    assert data['ERROR'] == 'User does not exist'
+    assert data['ERROR'] == 'Unregistered user'
 
 
 def test_add_review_not_exist_film(client, header):
@@ -245,7 +245,7 @@ def test_add_mark_not_exist_user(client, header):
     )
     data = json.loads(response.get_data())
     assert response.status_code == 404
-    assert data['ERROR'] == 'User does not exist'
+    assert data['ERROR'] == 'Unregistered user'
 
 
 def test_add_mark_not_exist_film(client, header):
